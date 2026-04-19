@@ -3,3 +3,7 @@ emotion_env/
 __pycache__/
 *.pyc
 .deepface/
+
+graph.png
+dashboard.html
+debug.png
