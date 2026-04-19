@@ -13,10 +13,9 @@ def detect_blink(ratio):
     # 🔥 strict eye close
     if ratio < 0.18:
         closed_frames += 1
-
     else:
         # eye reopened → blink confirm
-        if closed_frames >= 4:   # 👈 strong filter (ignore smile)
+        if closed_frames >= 4:
             blink_times.append(time.time())
             print("👁️ Real Blink")
 
@@ -27,12 +26,10 @@ def detect_blink(ratio):
         t1, t2 = blink_times[-2], blink_times[-1]
 
         if (t2 - t1 < 0.8) and (time.time() - last_blink_action > COOLDOWN):
-
             print("🔥 DOUBLE BLINK CONFIRMED")
             blink_times = []
             last_blink_action = time.time()
             return True
-
         else:
             blink_times.pop(0)
 

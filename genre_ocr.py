@@ -12,35 +12,43 @@ classifier = pipeline(
 
 labels = ["comedy", "love", "motivation", "music", "education", "gaming"]
 
+
 def clean_text(t):
     t = t.lower()
     bad = ["share", "subscribe", "like", "follow", "comments"]
+
     for b in bad:
         t = t.replace(b, "")
+
     return t.strip()
 
+
 def detect_genre_ocr():
-    print("📸 Capturing CAPTION AREA...")
+    print("📸 Capturing OPTIMIZED SHORTS AREA...")
 
     screen_w, screen_h = pyautogui.size()
 
-    # 🔥 slightly tighter caption region
+    # 🔥🔥 SHIFTED UP (20% FIX)
     region = (
-        int(screen_w * 0.30),
-        int(screen_h * 0.70),
-        int(screen_w * 0.40),
-        int(screen_h * 0.20)
+        int(screen_w * 0.35),   # left (center)
+        int(screen_h * 0.20),   # 🔥 moved UP (was 0.10)
+        int(screen_w * 0.30),   # width (center strip)
+        int(screen_h * 0.65)    # 🔥 reduced height (was 0.75)
     )
 
     img = pyautogui.screenshot(region=region)
     img.save("debug.png")
 
-    # 🔥 preprocess for better OCR
+    # 🔥 preprocess
     img_np = np.array(img)
     gray = cv2.cvtColor(img_np, cv2.COLOR_BGR2GRAY)
-    _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
 
-    text = pytesseract.image_to_string(thresh)
+    # better threshold
+    _, thresh = cv2.threshold(gray, 130, 255, cv2.THRESH_BINARY)
+
+    # 🔥 OCR config
+    custom_config = r'--oem 3 --psm 6'
+    text = pytesseract.image_to_string(thresh, config=custom_config)
 
     text = clean_text(text)
 
@@ -53,4 +61,5 @@ def detect_genre_ocr():
     genre = result["labels"][0]
 
     print("🎯 Genre:", genre)
+
     return genre
