@@ -61,9 +61,10 @@ body {{
     font-family:Poppins;
     background:black;
     color:white;
+    scroll-behavior:smooth;
 }}
 
-/* 🔥 NAVBAR FIXED */
+/* 🔥 NAVBAR PREMIUM */
 .navbar {{
     position:fixed;
     top:0;
@@ -85,7 +86,27 @@ body {{
 .nav-container a {{
     color:#00f2ff;
     text-decoration:none;
-    font-weight:500;
+    position:relative;
+    transition:0.3s;
+}}
+
+.nav-container a:hover {{
+    color:white;
+}}
+
+.nav-container a::after {{
+    content:"";
+    position:absolute;
+    left:0;
+    bottom:-5px;
+    width:0%;
+    height:2px;
+    background:cyan;
+    transition:0.3s;
+}}
+
+.nav-container a:hover::after {{
+    width:100%;
 }}
 
 /* HERO */
@@ -104,7 +125,7 @@ body {{
     width:100%;
     height:100%;
     object-fit:cover;
-    opacity:0.8;
+    opacity:1;
     transform: translateY(-20px);
 }}
 
@@ -112,6 +133,16 @@ body {{
     position:absolute;
     bottom:40px;
     left:50px;
+    opacity:0;
+    transform:translateY(40px);
+    animation:heroFade 1.5s ease forwards;
+}}
+
+@keyframes heroFade {{
+    to {{
+        opacity:1;
+        transform:translateY(0);
+    }}
 }}
 
 .big-text {{
@@ -125,8 +156,53 @@ body {{
 .section {{
     padding:100px;
     text-align:center;
+    opacity:0;
+    transform:translateY(40px);
+    transition:0.8s;
 }}
 
+.section.show {{
+    opacity:1;
+    transform:translateY(0);
+}}
+
+/* ANALYTICS */
+.analytics-section {{
+    background: radial-gradient(circle, #050505, #000);
+}}
+
+.analytics-container {{
+    display:flex;
+    gap:40px;
+    justify-content:center;
+    flex-wrap:wrap;
+}}
+
+.analytics-card {{
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(20px);
+    padding:30px;
+    border-radius:20px;
+    transition:0.4s;
+}}
+
+.analytics-card:hover {{
+    transform:scale(1.05);
+    box-shadow:0 0 40px cyan;
+}}
+
+/* GRAPH ANIMATION */
+.graph-img {{
+    width:80%;
+    animation:zoomIn 1.5s ease;
+}}
+
+@keyframes zoomIn {{
+    from {{transform:scale(0.8);opacity:0}}
+    to {{transform:scale(1);opacity:1}}
+}}
+
+/* TABLE */
 #table {{
     position:relative;
 }}
@@ -158,32 +234,18 @@ th {{
     background:#ff416c;
 }}
 
-/* MOBILE */
-@media(max-width:768px){{
-.big-text{{font-size:40px}}
-.desc{{font-size:14px}}
-.hero-content{{left:20px}}
-
-.nav-container {{
-    justify-content:center;
-    flex-wrap:wrap;
-    gap:15px;
-}}
-}}
-
 </style>
 </head>
 
 <body>
 
-<!-- 🔥 NAVBAR -->
 <div class="navbar">
-    <div class="nav-container">
-        <a href="#home">🏠 Home</a>
-        <a href="#analytics">📋 Analytics</a>
-        <a href="#graph">📈 Graph</a>
-        <a href="#table">📊 Charts</a>
-    </div>
+<div class="nav-container">
+<a href="#home">Home</a>
+<a href="#analytics">Analytics</a>
+<a href="#graph">Graph</a>
+<a href="#table">Charts</a>
+</div>
 </div>
 
 <section class="hero" id="home">
@@ -204,122 +266,152 @@ Controller with real-time analytics
 
 </section>
 
-<section class="section" id="analytics">
-<h2>Analytics</h2>
-<p>Time: {round(total_time,2)}</p>
-<p>Genre: {fav_genre}</p>
-<p>Mood: {mood}</p>
+<section class="section analytics-section" id="analytics">
+
+<h2>🚀 Insights</h2>
+
+<div class="analytics-container">
+
+<div class="analytics-card">
+<h3>Time</h3>
+<h1 id="timeCounter">{round(total_time,2)}</h1>
+</div>
+
+<div class="analytics-card">
+<h3>Genre</h3>
+<h1>{fav_genre}</h1>
+</div>
+
+<div class="analytics-card">
+<h3>Mood</h3>
+<h1>{mood}</h1>
+</div>
+
+</div>
+
 </section>
 
 <section class="section" id="graph">
 <h2>Emotion Trend</h2>
-<img src="graph.png">
+<img src="graph.png" class="graph-img">
 </section>
 
 <section class="section" id="table">
+
 <canvas id="particleCanvas"></canvas>
 
 <div class="table-content">
 <h2>Charts</h2>
+
 <table>
 <tr>
 <th>Reel</th><th>Genre</th><th>Time</th><th>Happy</th><th>Neutral</th><th>Sad</th>
 </tr>
 {rows}
 </table>
+
 </div>
+
 </section>
 
 <script>
 
-// 🎬 SCROLL VIDEO LIMIT
+// SCROLL VIDEO
 const video = document.getElementById("bgVideo");
 const hero = document.getElementById("home");
 
 window.addEventListener("scroll", () => {{
-    let rect = hero.getBoundingClientRect();
-    let progress = Math.min(Math.max(-rect.top / (hero.offsetHeight - window.innerHeight), 0), 1);
-
-    if(video.duration){{
-        let maxTime = Math.min(3.8, video.duration);
-        video.currentTime = maxTime * progress;
-    }}
+let rect = hero.getBoundingClientRect();
+let progress = Math.min(Math.max(-rect.top/(hero.offsetHeight-window.innerHeight),0),1);
+if(video.duration) {{
+video.currentTime = Math.min(3.8, video.duration) * progress;
+}}
 }});
 
-// 🔥 PARTICLES
+// SECTION REVEAL
+const sections = document.querySelectorAll(".section");
+
+window.addEventListener("scroll", () => {{
+sections.forEach(sec => {{
+let top = sec.getBoundingClientRect().top;
+if(top < window.innerHeight - 100) {{
+sec.classList.add("show");
+}}
+}});
+}});
+
+// COUNTER
+let el = document.getElementById("timeCounter");
+let final = parseFloat(el.innerText);
+let current = 0;
+
+let interval = setInterval(() => {{
+current += final/60;
+if(current>=final){{current=final;clearInterval(interval);}}
+el.innerText = current.toFixed(1);
+}},20);
+
+// PARTICLES SAME
 const canvas = document.getElementById("particleCanvas");
 const ctx = canvas.getContext("2d");
 
-function resizeCanvas(){{
-    canvas.width = window.innerWidth;
-    canvas.height = document.getElementById("table").offsetHeight;
-}}
-resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
+canvas.width = window.innerWidth;
+canvas.height = document.getElementById("table").offsetHeight;
 
 let mouse = {{x:null,y:null}};
 document.getElementById("table").addEventListener("mousemove", e => {{
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
+mouse.x = e.clientX;
+mouse.y = e.clientY;
 }});
 
 let particles = [];
-
 class Particle {{
-    constructor(){{
-        this.x = Math.random()*canvas.width;
-        this.y = Math.random()*canvas.height;
-        this.vx = Math.random()-0.5;
-        this.vy = Math.random()-0.5;
-    }}
-
-    update(){{
-        this.x += this.vx;
-        this.y += this.vy;
-
-        let dx = this.x - mouse.x;
-        let dy = this.y - mouse.y;
-        let dist = Math.sqrt(dx*dx+dy*dy);
-
-        if(dist < 120){{
-            this.x += dx/20;
-            this.y += dy/20;
-        }}
-    }}
-
-    draw(){{
-        ctx.beginPath();
-        ctx.arc(this.x,this.y,2,0,Math.PI*2);
-        ctx.fillStyle = "#00f2ff";
-        ctx.fill();
-    }}
+constructor(){{
+this.x=Math.random()*canvas.width;
+this.y=Math.random()*canvas.height;
+this.vx=Math.random()-0.5;
+this.vy=Math.random()-0.5;
+}}
+update(){{
+this.x+=this.vx;
+this.y+=this.vy;
+let dx=this.x-mouse.x;
+let dy=this.y-mouse.y;
+let dist=Math.sqrt(dx*dx+dy*dy);
+if(dist<120){{this.x+=dx/20;this.y+=dy/20;}}
+}}
+draw(){{
+ctx.beginPath();
+ctx.arc(this.x,this.y,2,0,Math.PI*2);
+ctx.fillStyle="#00f2ff";
+ctx.fill();
+}}
 }}
 
-for(let i=0;i<120;i++) particles.push(new Particle());
+for(let i=0;i<120;i++)particles.push(new Particle());
 
 function connect(){{
-    for(let i=0;i<particles.length;i++){{
-        for(let j=i;j<particles.length;j++){{
-            let dx = particles[i].x - particles[j].x;
-            let dy = particles[i].y - particles[j].y;
-            let dist = Math.sqrt(dx*dx+dy*dy);
-
-            if(dist < 100){{
-                ctx.strokeStyle = "rgba(0,242,255,0.1)";
-                ctx.beginPath();
-                ctx.moveTo(particles[i].x,particles[i].y);
-                ctx.lineTo(particles[j].x,particles[j].y);
-                ctx.stroke();
-            }}
-        }}
-    }}
+for(let i=0;i<particles.length;i++){{
+for(let j=i;j<particles.length;j++){{
+let dx=particles[i].x-particles[j].x;
+let dy=particles[i].y-particles[j].y;
+let dist=Math.sqrt(dx*dx+dy*dy);
+if(dist<100){{
+ctx.strokeStyle="rgba(0,242,255,0.1)";
+ctx.beginPath();
+ctx.moveTo(particles[i].x,particles[i].y);
+ctx.lineTo(particles[j].x,particles[j].y);
+ctx.stroke();
+}}
+}}
+}}
 }}
 
 function animate(){{
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    particles.forEach(p=>{{p.update();p.draw();}});
-    connect();
-    requestAnimationFrame(animate);
+ctx.clearRect(0,0,canvas.width,canvas.height);
+particles.forEach(p=>{{p.update();p.draw();}});
+connect();
+requestAnimationFrame(animate);
 }}
 
 animate();
@@ -333,4 +425,4 @@ animate();
     with open("dashboard.html","w") as f:
         f.write(html)
 
-    print("🔥 NAVBAR PERFECTLY FIXED (NO CUT, CLEAN ALIGN)")
+    print("🔥 FULL PREMIUM UI LOADED 🚀")
