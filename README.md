@@ -181,5 +181,7 @@ python app.py
 MIT License
 
 ---
+![Demo](assets/Readme_Bottom.gif)
 
+---
 ✨ *AI + Vision + Automation = Future Interaction* ✨
